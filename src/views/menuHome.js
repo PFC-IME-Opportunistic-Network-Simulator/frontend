@@ -18,7 +18,7 @@ class MenuHome extends React.Component{
                     <a href="#/home"> 
                     <Button 
                             label="Ir para a simulação"
-                            icon="pi pi-arrow-right"
+                            icon="pi pi-desktop"
                             style={ {maxHeight: '35px', marginTop: '5px'} }
                         />
                     </a>

@@ -11,37 +11,45 @@ class UserMenu extends React.Component {
         this.menu = React.createRef()
         this.toast = React.createRef()
     }
-    items = [
-        {
-            label: 'Opções',
-            items: [
+
+    render() {
+
+        const changePasswordItem = 
+            {
+                label: 'Alterar Senha',
+                icon: 'pi pi-refresh',
+                command: () => {
+                    window.location="#/changePassword"
+                }
+            }
+
+        const exitItem =
+            {
+                label: 'Sair',
+                icon: 'pi pi-sign-out',
+                command: () => {
+                    this.props.endSession()
+                    window.location="#/Login"
+                }
+            }
+
+        const doItems = () => {
+            var itemsArray = []
+            if(this.props.isAuth) itemsArray.push(changePasswordItem)
+            itemsArray.push(exitItem)
+            return [
                 {
-                    label: 'Alterar Senha',
-                    icon: 'pi pi-refresh',
-                    command: () => {
-                        window.location="#/changePassword"
-                    }
-                },
-                {
-                    label: 'Sair',
-                    icon: 'pi pi-sign-out',
-                    command: () => {
-                        this.props.endSession()
-                        window.location="#/Login"
-                    }
+                    label: 'Opções',
+                    items: itemsArray
                 }
             ]
         }
-        
-    ]
 
-    render() {
-        if(this.props.render){
             return (
                 <div>
                     <Toast ref={this.toast}></Toast>
 
-                    <Menu model={this.items} popup ref={this.menu} id="popup_menu" />
+                    <Menu model={doItems()} popup ref={this.menu} id="popup_menu" />
                     <Button className="p-button-raised p-button-secondary p-button-text"
                             icon="pi pi-bars"
                             style={ {width: '50px'} }
@@ -50,8 +58,6 @@ class UserMenu extends React.Component {
                             aria-haspopup ></Button>
                 </div>
             )
-        }
-        return false
     }
 
 }
