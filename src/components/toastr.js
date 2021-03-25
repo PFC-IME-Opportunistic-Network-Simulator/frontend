@@ -37,7 +37,7 @@ toastr.options = {
       popUp("Erro", message, "error")
   }
 
-  export function noticeParametrizePopUp(){
+  export function fixPopUp(){
     toastr.options = {
         "closeButton": true,
         "debug": false,
@@ -56,7 +56,7 @@ toastr.options = {
         "hideMethod": "fadeOut"
       }
       popUp("", 
-      "<div>Há produtos não parametrizados</div><a href=\"#/parameterize\"> <button type=\"button\" id=\"okBtn\" class=\"btn btn-danger\">Ir para as parametrizações</button></a>"
+      "<div>Fix popUp</div><a href=\"#/parameterize\"> <button type=\"button\" id=\"okBtn\" class=\"btn btn-danger\">Ir para as parametrizações</button></a>"
       , "error")
       toastr.options = {
         "closeButton": true,

@@ -23,7 +23,9 @@ class Login extends React.Component{
         errorPasswordMessage: null,
         inputPasswordErrorClass: null,
         loginButtonMessage: 'Entrar',
-        disableLoginButton: false
+        disableLoginButton: false,
+        signInWithoutLoginButtonMessage: 'Usar sem login',
+        disableSignInWithouLoginButton: false
     }
 
     resetView = () => {
@@ -46,7 +48,6 @@ class Login extends React.Component{
             var sessionInfo = data.sessionInfo
             this.context.beginSession(sessionInfo)
             this.props.history.push(`/home/${sessionInfo.user.name}/${sessionInfo.user.email}`)
-            if(data.unparametrizedBuyProducts) popUp.noticeParametrizePopUp()
         }).catch(error => {
             if(error.response){
             var data = error.response.data
@@ -62,6 +63,12 @@ class Login extends React.Component{
             this.setState({loginButtonMessage: 'Entrar'})
             this.setState({disableLoginButton: false})
         })
+    }
+
+    signInWithoutLogin = () => {
+        this.setState({signInWithoutLoginButtonMessage: 'Entrando...'})
+        this.setState({disableLoginButton: true})
+        this.props.history.push('/home')
     }
 
     handleKeypress = e => {
@@ -118,9 +125,17 @@ class Login extends React.Component{
                                     onClick={this.signUp}
                                     style={ {maxHeight: '35px', marginLeft: '8px'} }
                                     />
-                                 <Button label="Esqueceu a senha?"
+                                <Button label="Esqueceu a senha?"
                                         className="p-button-info p-button-text"
                                         onClick = {() => {this.props.history.push('/recoverPassword')}} />
+                                <Button 
+                                    label={this.state.signInWithoutLoginButtonMessage}
+                                    className = "p-button-help"
+                                    icon="pi pi-sign-in"
+                                    onClick={this.signInWithoutLogin}
+                                    style={ {maxHeight: '35px', marginTop: '8px'} }
+                                    disabled={this.state.disableSignInWithouLoginButton}
+                                    />
                             </fieldset>
                         </Card>
                     </div>
