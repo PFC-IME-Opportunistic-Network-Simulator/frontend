@@ -1,5 +1,5 @@
-# Finances
+# IME-Opportunistic-Network-Simulator
 
-Programas necessários:
+Softwares necessários:
 - Visual Studio Code
-- Node e npm
+- Node e npm (versões mais atuais)
