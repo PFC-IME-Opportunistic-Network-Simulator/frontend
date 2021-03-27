@@ -13,7 +13,6 @@ import 'toastr/build/toastr.css'
 import 'primereact/resources/themes/saga-blue/theme.css'
 import 'primereact/resources/primereact.min.css'
 import 'primeicons/primeicons.css'
-import AuthenticationProvider from './authProvider'
 import Topbar from '../components/topbar';
 
 class App extends React.Component {
@@ -21,12 +20,8 @@ class App extends React.Component {
   render(){
     return(
       <div className = "body-color" >
-      <AuthenticationProvider>
       <Topbar />
-      {/* <div className = "container"> */}
         <Routes />
-      {/* </div> */}
-      </AuthenticationProvider>
       </div>
     );
   }

@@ -1,7 +1,6 @@
 import React from 'react'
 import { Menubar } from 'primereact/menubar'
 import UserMenu from './navbar/userMenu';
-import { AuthContext } from '../main/authProvider';
 
 class Topbar extends React.Component {
 
@@ -16,17 +15,15 @@ class Topbar extends React.Component {
             }
         ]
         // const start = <UserMenu render = {this.context.isAuth} endSession = {this.context.endSession} />;
-        const end = <UserMenu isAuth = {this.context.isAuth} endSession = {this.context.endSession} />;
+        // const end = <UserMenu isAuth = {this.context.isAuth} endSession = {this.context.endSession} />;
         return (
             <div>
                 <div className="card">
-                    <Menubar model={items} end={end} />
+                    <Menubar model={items}/>
                 </div>
             </div>
         )
     }
 }
-
-Topbar.contextType = AuthContext
 
 export default Topbar

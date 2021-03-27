@@ -2,7 +2,6 @@ import React from 'react'
 import { withRouter } from 'react-router-dom'
 import Card from '../components/card'
 
-import { AuthContext } from '../main/authProvider'
 
 import { Button } from 'primereact/button'
 
@@ -33,7 +32,5 @@ class MenuHome extends React.Component{
     }
 
 }
-
-MenuHome.contextType = AuthContext
 
 export default withRouter(MenuHome)
