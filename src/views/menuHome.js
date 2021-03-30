@@ -10,13 +10,13 @@ class MenuHome extends React.Component{
     render() {
         return(
             <div className="bs-docs-section" >
-                <Card title="Criar simulação">
-                    Defina seus parâmetros de simulação da rede como a quantidade de nós e as taxas de encontro
-                    para realizar sua simulação
+                <Card title="Create simulation">
+                    Define your network simulation parameters such as the number of nodes and the encounter rates
+                    to perform your simulation
                     <br />
-                    <a href="#/home"> 
+                    <a href="#/simulation"> 
                     <Button 
-                            label="Ir para a simulação"
+                            label="Go to simulation"
                             icon="pi pi-desktop"
                             style={ {maxHeight: '35px', marginTop: '5px'} }
                         />

@@ -8,9 +8,9 @@ class Topbar extends React.Component {
         const items = [
             {label: 'Home', icon: 'pi pi-fw pi-home', command: () => {window.location="#/Home"}},
             // {label: 'Usuários', icon: 'pi pi-user', command: () => {window.location="#/signUp"}}, 
-            {label: "Módulos", icon: 'pi pi-list',
+            {label: "Modules", icon: 'pi pi-list',
                 items: [
-                    {label: "Simulação", icon: 'pi pi-desktop', command: ()=> {window.location="#/home"}},
+                    {label: "Simulation", icon: 'pi pi-desktop', command: ()=> {window.location="#/simulation"}},
                 ]
             }
         ]

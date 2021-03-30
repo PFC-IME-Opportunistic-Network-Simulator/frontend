@@ -2,6 +2,7 @@ import React from 'react'
 import { Route, Switch, HashRouter, Redirect } from 'react-router-dom'
 
 import MenuHome from '../views/menuHome'
+import Simulation from '../views/simulation'
 
 
 function RedirectRoute( {component: Component, isAuth, checkSession, ...props} ) {
@@ -28,6 +29,7 @@ function Routes(props){
         <HashRouter>
             <Switch>
                 <Route path = "/home" component = {MenuHome} />
+                <Route path = "/simulation" component = {Simulation} />
                 <RedirectRoute path = "/" />
             </Switch>
         </HashRouter>
