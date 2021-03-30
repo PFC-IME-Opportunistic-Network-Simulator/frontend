@@ -7,7 +7,9 @@ import SelectMenu from '../components/selectMenu'
 
 
 import { Button } from 'primereact/button'
+
 import SimulationTable from '../components/simulation/SimulationTable'
+import SimulationService from '../app/service/simulationService'
 
 class Simulation extends React.Component{
 
@@ -16,13 +18,24 @@ class Simulation extends React.Component{
         totalSimulationTime: null,
         timeUnitty: 's',
         pairs: [],
-        showPairs: false
+        showPairs: false,
+        minNode1Index: null,
+        maxNode1Index: null,
+        minNode2Index: null,
+        maxNode2Index: null,
+        
     }
 
     handleChange = event => {
         const value = event.target.value
         const name = event.target.name
         this.setState({ [name]: value })
+    }
+
+    handleSelectChange = event => {
+        const value = event.target.value
+        const name = event.target.name
+        this.setState({ [name]: value === '' ? null : value })
     }
 
     defineParameters = async () => {
@@ -34,8 +47,8 @@ class Simulation extends React.Component{
                         id: id++,
                         node1: i,
                         node2: j,
-                        rate: 0,
-                        variabilityRate: false,
+                        rate: null,
+                        variabilityRate: null,
                         variabilityDegree: null
                     })
             }
@@ -44,12 +57,37 @@ class Simulation extends React.Component{
         this.setState({showPairs: true})
     }
 
+    filterPairs = () => {
+        var filteredPairs = []
+        console.log('indexes: ', this.state.minNode1Index, this.state.maxNode1Index, this.state.minNode2Index, this.state.maxNode2Index)
+        this.state.pairs.forEach(pair => {
+            var minNode1 = this.state.minNode1Index === null ? true : pair.node1 >= this.state.minNode1Index
+            var maxNode1 = this.state.maxNode1Index === null ? true : pair.node1 <= this.state.maxNode1Index
+            var minNode2 = this.state.minNode2Index === null ? true : pair.node2 >= this.state.minNode2Index
+            var maxNode2 = this.state.maxNode2Index === null ? true : pair.node2 <= this.state.maxNode2Index
+            console.log('\n')
+            console.log('minNode1: ', minNode1)
+            console.log('maxNode1: ', maxNode1)
+            console.log('minNode2: ', minNode2)
+            console.log('maxNode2: ', maxNode2)
+            console.log('\n')
+            if(minNode1 && maxNode1 && minNode2 && maxNode2){
+                filteredPairs.push(pair)
+            }
+        })
+        return filteredPairs
+    }
+
     render() {
 
         const timeUnityList = [
             {label:'s', value: 's'},
 	        {label:'ms', value: 'ms'}
         ]
+
+        const minNodeIndexes = SimulationService.minNode1Indexes(this.state.numberOfNodes)
+        const maxNode1Indexes = SimulationService.maxNode1Indexes(this.state.numberOfNodes, this.state.minNode1Index)
+        const maxNode2Indexes = SimulationService.maxNode1Indexes(this.state.numberOfNodes, this.state.minNode2Index)
 
         return(
             <div className="bs-docs-section" >
@@ -68,6 +106,82 @@ class Simulation extends React.Component{
                             />
                         </FormGroup> 
                     </div>
+                    </div>
+                    
+                    <Button 
+                        label="Define Nodes Parameters"
+                        icon="pi pi-pencil"
+                        onClick={this.defineParameters}
+                        style={ {maxHeight: '35px'} }
+                        disabled={this.state.numberOfNodes === null}
+                    />
+                    <br />
+                    <br />
+                    {   this.state.showPairs ?
+                    (
+                    <>
+                    <div className="row">
+                    <div className = "col-md-5">
+                    <h5> Node 1 Interval </h5>
+                    </div>
+                    <div className = "col-md-5">
+                    <h5> Node 2 Interval </h5>
+                    </div>
+                    </div>
+                    <div className="row">
+                    <div className = "col-md-5">
+                    <div className = "col-md-3">
+                        <FormGroup label = "min_index " htmlFor = "minNode1Index">
+                            <SelectMenu className={"form-control " }
+                                        name="minNode1Index"
+                                        list= {minNodeIndexes} 
+                                        onChange={this.handleSelectChange}
+                            />
+                        </FormGroup>
+                    </div>
+                    <div className = "col-md-3">
+                    <FormGroup label = "max_index " htmlFor = "maxNode1Index">
+                            <SelectMenu className={"form-control " }
+                                        name="maxNode1Index"
+                                        list= {maxNode1Indexes} 
+                                        onChange={this.handleSelectChange}
+                            />
+                        </FormGroup>
+                    </div>
+                    </div>
+                    <div className = "col-md-5">
+                    <div className = "col-md-3">
+                        <FormGroup label = "min_index " htmlFor = "minNode2Index">
+                            <SelectMenu className={"form-control " }
+                                        name="minNode2Index"
+                                        list= {minNodeIndexes} 
+                                        onChange={this.handleSelectChange}
+                            />
+                        </FormGroup>
+                    </div>
+                    <div className = "col-md-3">
+                    <FormGroup label = "max_index " htmlFor = "maxNode2Index">
+                            <SelectMenu className={"form-control " }
+                                        name="maxNode2Index"
+                                        list= {maxNode2Indexes} 
+                                        onChange={this.handleSelectChange}
+                            />
+                        </FormGroup>
+                    </div>
+                    </div>
+                    </div>
+                    </>
+                    )
+                    : ( <div /> )
+                    }
+                    <br />
+                    {
+                        this.state.showPairs ? (
+                            <SimulationTable list = {this.filterPairs()}/>
+                        ) : (<div />)
+                    }
+                    <br />
+                    <div className="row">
                     <div className = "col-md-5">
                         <FormGroup label = "Total simulation time " htmlFor = "InputTime">
                             <input type="number"
@@ -84,28 +198,13 @@ class Simulation extends React.Component{
                         <FormGroup label = "Unity " htmlFor = "InputUnity">
                             <SelectMenu className={"form-control " }
                                         name="timeUnitty"
-                                        list= {timeUnityList} 
-                                        // value={this.state.parametrized}
+                                        list= {timeUnityList}
                                         onChange={this.handleChange}
-                                        />
+                            />
                         </FormGroup>
-
                     </div>
                     </div>
-                    <Button 
-                        label="Define Node Parameters"
-                        icon="pi pi-pencil"
-                        onClick={this.defineParameters}
-                        style={ {maxHeight: '35px'} }
-                        disabled={this.state.numberOfNodes === null || this.state.totalSimulationTime === null}
-                    />
                 </div>
-            <br />
-            {
-                this.state.showPairs ? (
-                    <SimulationTable list = {this.state.pairs}/>
-                ) : (<div />)
-            }
             </Card>
             <div className="d-flex "/>
             </div>        
