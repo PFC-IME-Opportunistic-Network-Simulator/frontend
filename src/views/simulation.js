@@ -7,8 +7,9 @@ import SelectMenu from '../components/selectMenu'
 
 
 import { Button } from 'primereact/button'
+import { Dialog } from 'primereact/dialog'
 
-import SimulationTable from '../components/simulation/SimulationTable'
+import SimulationTable from '../components/simulation/simulationTable'
 import SimulationService from '../app/service/simulationService'
 
 class Simulation extends React.Component{
@@ -19,6 +20,7 @@ class Simulation extends React.Component{
         timeUnitty: 's',
         pairs: [],
         showPairs: false,
+        displayCancelConfimation: false,
         minNode1Index: null,
         maxNode1Index: null,
         minNode2Index: null,
@@ -48,7 +50,7 @@ class Simulation extends React.Component{
                         node1: i,
                         node2: j,
                         rate: null,
-                        variabilityRate: null,
+                        variableRate: null,
                         variabilityDegree: null
                     })
             }
@@ -57,20 +59,35 @@ class Simulation extends React.Component{
         this.setState({showPairs: true})
     }
 
+    configurePairs = (parametrs, selectedPairs) => {
+        var pairArray = this.state.pairs
+        selectedPairs.forEach(modifiedPair => {
+            const p = pairArray.find(pair => pair.id === modifiedPair.id)
+            console.log('id: ', p.id)
+        })
+
+    }
+
+    cancelDefineParameters = () => {
+        this.setState({pairs: []})
+        this.setState({showPairs: false})
+        this.setState({displayCancelConfimation: false})
+    }
+
     filterPairs = () => {
         var filteredPairs = []
-        console.log('indexes: ', this.state.minNode1Index, this.state.maxNode1Index, this.state.minNode2Index, this.state.maxNode2Index)
+        // console.log('indexes: ', this.state.minNode1Index, this.state.maxNode1Index, this.state.minNode2Index, this.state.maxNode2Index)
         this.state.pairs.forEach(pair => {
             var minNode1 = this.state.minNode1Index === null ? true : pair.node1 >= this.state.minNode1Index
             var maxNode1 = this.state.maxNode1Index === null ? true : pair.node1 <= this.state.maxNode1Index
             var minNode2 = this.state.minNode2Index === null ? true : pair.node2 >= this.state.minNode2Index
             var maxNode2 = this.state.maxNode2Index === null ? true : pair.node2 <= this.state.maxNode2Index
-            console.log('\n')
-            console.log('minNode1: ', minNode1)
-            console.log('maxNode1: ', maxNode1)
-            console.log('minNode2: ', minNode2)
-            console.log('maxNode2: ', maxNode2)
-            console.log('\n')
+            // console.log('\n')
+            // console.log('minNode1: ', minNode1)
+            // console.log('maxNode1: ', maxNode1)
+            // console.log('minNode2: ', minNode2)
+            // console.log('maxNode2: ', maxNode2)
+            // console.log('\n')
             if(minNode1 && maxNode1 && minNode2 && maxNode2){
                 filteredPairs.push(pair)
             }
@@ -89,6 +106,18 @@ class Simulation extends React.Component{
         const maxNode1Indexes = SimulationService.maxNode1Indexes(this.state.numberOfNodes, this.state.minNode1Index)
         const maxNode2Indexes = SimulationService.maxNode1Indexes(this.state.numberOfNodes, this.state.minNode2Index)
 
+        const renderCancelConfirmationFooter = () => {
+            return (
+                <div>
+                    <Button label="Confirmar" icon="pi pi-check"
+                            onClick={this.cancelDefineParameters} autoFocus />
+                    <Button label="Cancelar" icon="pi pi-times" onClick={() => this.setState({displayCancelConfimation: false})}
+                            className="p-button-text" />
+                </div>
+            );
+        
+        }
+
         return(
             <div className="bs-docs-section" >
             <Card title = "Simulation">
@@ -102,24 +131,32 @@ class Simulation extends React.Component{
                                     name="numberOfNodes"
                                     onChange={this.handleChange}
                                     id="InputNodes"
-                                    placeholder="Type the number of nodes" 
+                                    placeholder="Type the number of nodes"
+                                    disabled={this.state.showPairs} 
                             />
                         </FormGroup> 
                     </div>
                     </div>
                     
-                    <Button 
+                    {/* <Button 
                         label="Define Nodes Parameters"
                         icon="pi pi-pencil"
                         onClick={this.defineParameters}
                         style={ {maxHeight: '35px'} }
                         disabled={this.state.numberOfNodes === null}
-                    />
-                    <br />
-                    <br />
+                    /> */}
                     {   this.state.showPairs ?
                     (
                     <>
+                    <Button className="p-button-danger" 
+                        label="Cancel"
+                        icon="pi pi-times"
+                        onClick={() => this.setState({displayCancelConfimation: true})}
+                        style={ {maxHeight: '35px'} }
+                        disabled={this.state.numberOfNodes === null}
+                    />
+                    <br/>
+                    <br/>
                     <div className="row">
                     <div className = "col-md-5">
                     <h5> Node 1 Interval </h5>
@@ -130,6 +167,7 @@ class Simulation extends React.Component{
                     </div>
                     <div className="row">
                     <div className = "col-md-5">
+                    <div className="row">
                     <div className = "col-md-3">
                         <FormGroup label = "min_index " htmlFor = "minNode1Index">
                             <SelectMenu className={"form-control " }
@@ -149,7 +187,9 @@ class Simulation extends React.Component{
                         </FormGroup>
                     </div>
                     </div>
+                    </div>
                     <div className = "col-md-5">
+                    <div className="row">
                     <div className = "col-md-3">
                         <FormGroup label = "min_index " htmlFor = "minNode2Index">
                             <SelectMenu className={"form-control " }
@@ -170,14 +210,23 @@ class Simulation extends React.Component{
                     </div>
                     </div>
                     </div>
+                    </div>
                     </>
                     )
-                    : ( <div /> )
+                    : ( <Button 
+                        label="Define Nodes Parameters"
+                        icon="pi pi-pencil"
+                        onClick={this.defineParameters}
+                        style={ {maxHeight: '35px'} }
+                        disabled={this.state.numberOfNodes === null}
+                    /> )
                     }
                     <br />
                     {
                         this.state.showPairs ? (
-                            <SimulationTable list = {this.filterPairs()}/>
+                            <SimulationTable list = {this.filterPairs()}
+                                configurePairs = {this.configurePairs}
+                            />
                         ) : (<div />)
                     }
                     <br />
@@ -206,6 +255,17 @@ class Simulation extends React.Component{
                     </div>
                 </div>
             </Card>
+            <Dialog header="Deletar Configuração"
+                        visible={this.state.displayCancelConfimation}
+                        modal = {true} //congela restante da tela
+                        style={{ width: '350px' }}
+                        footer={renderCancelConfirmationFooter()}
+                        onHide={() => this.setState({displayConfirmation: false})}>
+                    <div className="confirmation-content row" style={{marginLeft: '10px'}}>
+                        <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem', marginRight: '10px'}} />
+                        <div style={{marginBottom: '10px'}}> Deseja cancelar configuração? </div>
+                    </div>
+            </Dialog>
             <div className="d-flex "/>
             </div>        
         )

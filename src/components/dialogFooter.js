@@ -7,13 +7,13 @@ export default function DialogFooter (props) {
         <React.Fragment>
             {
                 !props.disabled ? (
-                    <Button label="Salvar" icon="pi pi-check" className="p-button-text" onClick={props.save} />
+                    <Button label="Save" icon="pi pi-check" className="p-button-text" onClick={props.save} />
                 ) :
                 (
                     <div/>
                 )
             }
-            <Button label="Cancelar" icon="pi pi-times" className="p-button-text" onClick={props.hideDialog} />
+            <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={props.hideDialog} />
         </React.Fragment>
     )
 }
