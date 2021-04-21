@@ -23,18 +23,18 @@ toastr.options = {
   }
 
   export function successPopUp(message){
-      popUp("Sucesso", message, "success")
+      popUp("Sucess", message, "success")
   }
 
   export function warningPopUp(message){
-      popUp("Alerta", message, "warning")
+      popUp("Alert", message, "warning")
   }
   export function infoPopUp(message){
       popUp("Info", message, "info")
   }
 
   export function errorPopUp(message){
-      popUp("Erro", message, "error")
+      popUp("Error", message, "error")
   }
 
   export function fixPopUp(){

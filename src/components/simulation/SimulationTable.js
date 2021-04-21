@@ -21,7 +21,7 @@ class SimulationTable extends React.Component{
         return '(' + pair.node1 + ', ' + pair.node2 + ')'
     }
 
-    variabilityRate = (pair) => {
+    variableRate = (pair) => {
         return pair.variableRate === null ? null : (pair.variableRate === true ? 'Yes' : 'No')
     }
 
@@ -33,6 +33,11 @@ class SimulationTable extends React.Component{
         this.setState({displayConfigurePairsDialog: false})
         this.setState({selectedPairs: []})
         this.props.configurePairs(parameters, this.state.selectedPairs)
+    }
+
+    desconfigurePairs = () => {
+        this.props.undoPairsConfiguration(this.state.selectedPairs)
+        this.setState({selectedPairs: []})
     }
 
     render(){
@@ -54,7 +59,7 @@ class SimulationTable extends React.Component{
                 <React.Fragment>
                         <Button label="Undo" icon="pi pi-undo" className="p-button-danger"
                                 style ={{marginLeft: '10px'}}
-                                onClick={() => this.cancelParametrize()}
+                                onClick={this.desconfigurePairs}
                                 disabled={this.state.selectedPairs.length === 0}
                                 />
                 </React.Fragment>
