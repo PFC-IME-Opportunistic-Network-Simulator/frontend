@@ -27,7 +27,6 @@ class SimulationService extends ApiService{
             const instant = meet.instant
             const node1 = meet.pair.node1
             const node2 = meet.pair.node2
-            console.log(instant, node1, node2)
             responseMessage += 'Instant: ' + instant + '\n' + '( ' + node1 + ', ' + node2 + ' )' + '\n' + '\n'
         })
         return responseMessage

@@ -152,13 +152,18 @@ class Simulation extends React.Component{
         if(this.checkData()){
             this.simulationService.generateMeetingTrace({
                 pairsList: this.state.pairs,
+                numberOfNodes: this.state.numberOfNodes,
                 totalSimulationTime: this.state.totalSimulationTime
             }).then(response => {
                 this.setState({displayMeetingTrace: true})
                 const meetingTrace= this.simulationService.parseMeetingTrace(response.data)
                 this.setState({meetingTrace})
             })
-            .catch(error => errorPopUp(error.response))
+            .catch(error => {
+               console.log(error)
+               errorPopUp(error.response)
+            }
+            )
         }
     }
 
