@@ -37,6 +37,7 @@ class Simulation extends React.Component{
         minNode2Index: null,
         maxNode2Index: null,
         meetingTrace: null,
+        messagesResponse: null,
         displayMeetingTrace: false,   
     }
 
@@ -156,8 +157,10 @@ class Simulation extends React.Component{
                 totalSimulationTime: this.state.totalSimulationTime
             }).then(response => {
                 this.setState({displayMeetingTrace: true})
-                const meetingTrace= this.simulationService.parseMeetingTrace(response.data)
+                const meetingTrace= this.simulationService.parseMeetingTrace(response.data.meetingTrace)
                 this.setState({meetingTrace})
+                const messagesResponse = this.simulationService.parseMessages(response.data.messages)
+                this.setState({messagesResponse})
             })
             .catch(error => {
                console.log(error)
@@ -400,13 +403,26 @@ class Simulation extends React.Component{
                         this.state.displayMeetingTrace ? (
                             <div>
                                 <br />
-                                <FormGroup label = "Meeting Trace " htmlFor = "outputMeetingTrace">
-                                    <textarea   className={"form-control " }
-                                                id="outputMeetingTrace"
-                                                name="meetingTrace"
-                                                value={this.state.meetingTrace}
-                                                style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
-                                </FormGroup>
+                                <div className="row">
+                                <div className = "col-md-6">
+                                    <FormGroup label = "Meeting Trace " htmlFor = "outputMeetingTrace">
+                                        <textarea   className={"form-control " }
+                                                    id="outputMeetingTrace"
+                                                    name="meetingTrace"
+                                                    value={this.state.meetingTrace}
+                                                    style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
+                                    </FormGroup>
+                                </div>
+                                <div className = "col-md-6">
+                                    <FormGroup label = "Messages Response " htmlFor = "outputMessagesResponse">
+                                        <textarea   className={"form-control " }
+                                                    id="outputMessagesResponse"
+                                                    name="messagesResponse"
+                                                    value={this.state.messagesResponse}
+                                                    style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
+                                    </FormGroup>
+                                </div>
+                                </div>
                             </div>
                         ) :
                         (

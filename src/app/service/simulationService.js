@@ -32,8 +32,18 @@ class SimulationService extends ApiService{
         return responseMessage
     }
 
+    parseMessages(messages){
+        var responseMessage = ''
+        messages.forEach(message => {
+                responseMessage += JSON.stringify(message)
+                responseMessage += '\n\n'
+            }
+            )
+        return responseMessage
+    }
+
     generateMeetingTrace(simulationData){
-        return this.post('/generateMeetingTrace', simulationData)
+        return this.post('/executeSimulation', simulationData)
     }
 
 
