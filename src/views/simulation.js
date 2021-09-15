@@ -18,16 +18,47 @@ import { errorPopUp, warningPopUp } from "../components/toastr"
 const visiblePairsTrueOption = {name: 'All', key: true}
 const visiblePairsFalseOption = {name: 'Just not configured yet', key: false}
 const inputErrorClass = "is-invalid"
+const invalidFeedback = "invalid-feedback"
+const integerInput = ["numberOfRounds"]
 
 class Simulation extends React.Component{
 
     state = {
+        numberOfRounds: null,
+        inputNumberOfRoundsErrorClass: '',
+        errorNumberOfRoundsMessage: '',
+
+        messageGenarationType: '',
+
+        messageGenerationInstant: null,
+        inputMessageGenerationInstantErrorClass: '',
+        errorMessageGenerationInstantMessage: '',
+
+        protocolType: null,
+        inputProtocolTypeErrorClass: '',
+        errorProtocolTypeMessage: '',
+
+        sprayAndWaitLParameter: null,
+        inputSprayAndWaitLParameterErrorClass: '',
+        errorSprayAndWaitLParameterMessage: '',
+        
+        epidemicPParameter: null,
+        inputEpidemicPParameterErrorClass: '',
+        errorEpidemicPParameterMessage: '',
+
+        epidemicQParameter: null,
+        inputEpidemicQParameterErrorClass: '',
+        errorEpidemicQParameterMessage: '',
+
         numberOfNodes: null,
+        inputNumberOfNodesErrorClass: '',
+        errorNumberOfNodesMessage: '',
         visiblePairs: visiblePairsFalseOption,
+
         totalSimulationTime: null,
         inputSimulationTimeErrorClass: '',
         errorSimulationTimeMessage: '',
-        timeUnitty: 's',
+
         pairs: [],
         filteredPairs: [],
         showPairs: false,
@@ -47,15 +78,26 @@ class Simulation extends React.Component{
     }
 
     handleChange = event => {
-        const value = event.target.value
+        var value = event.target.value
         const name = event.target.name
+        if(value < 0)
+            value = -value
+        if(integerInput.includes(name))
+            value = value.replace(/\D/,'')
         this.setState({ [name]: value })
     }
 
-    handleSelectChange = async event => {
+    handleSelectChange = event =>{
         const value = event.target.value
         const name = event.target.name
-        await this.setState({ [name]: value === '' ? null : value })
+        this.setState({ [name]: value === '' ? null : value })
+    }
+
+    handleSelectNodeChange = async event => {
+        // const value = event.target.value
+        // const name = event.target.name
+        // await this.setState({ [name]: value === '' ? null : value })
+        await this.handleSelectChange(event)
         this.filterPairs()
     }
 
@@ -91,14 +133,14 @@ class Simulation extends React.Component{
         this.setState({showPairs: true})
     }
 
-    configurePairs = async (parametrs, configuredPairs) => {
+    configurePairs = async (parameters, configuredPairs) => {
         var pairs = this.state.pairs
         configuredPairs.forEach(configuredPair => {
             var pairToUpdate = pairs.find(pair => pair.id === configuredPair.id)
             const index = pairs.indexOf(pairToUpdate)
-            pairToUpdate.rate = parametrs.rate
-            pairToUpdate.variableRate = parametrs.variableRate
-            pairToUpdate.variabilityDegree = parametrs.variabilityDegree
+            pairToUpdate.rate = parameters.rate
+            pairToUpdate.variableRate = parameters.variableRate
+            pairToUpdate.variabilityDegree = parameters.variabilityDegree
             pairToUpdate.configured = true
             pairs[index] = pairToUpdate
             
@@ -206,16 +248,24 @@ class Simulation extends React.Component{
 
         const visiblePairsOption = [visiblePairsTrueOption, visiblePairsFalseOption]
 
-        const timeUnityList = [
-            {label:'s', value: 's'},
-	        {label:'ms', value: 'ms'}
-        ]
-
         const minNodeIndexes = SimulationService.minNodeIndexes(this.state.numberOfNodes)
         // const maxNode1Indexes = SimulationService.maxNodeIndexes(this.state.numberOfNodes, parseInt(this.state.minNode1Index))
         // const maxNode2Indexes = SimulationService.maxNodeIndexes(this.state.numberOfNodes, parseInt(this.state.minNode2Index))
         const maxNode1Indexes = SimulationService.minNodeIndexes(this.state.numberOfNodes)
         const maxNode2Indexes = SimulationService.minNodeIndexes(this.state.numberOfNodes)
+
+        const messageGenarationTypes = [{label: '', value: ''},
+                                        {label: 'FIXED_NODES', value: 'FIXED_NODES'},
+                                        {label: 'RANDOM_NODES', value: 'RANDOM_NODES'}, 
+                                        {label: 'ALL_PAIRS', value: 'ALL_PAIRS'}]
+
+        const protocolTypes = [ {label: '', value: ''},
+                                {label: 'EPIDEMIC', value: 'EPIDEMIC'},
+                                {label: 'SINGLE_COPY_EPIDEMIC', value: 'SINGLE_COPY_EPIDEMIC'}, 
+                                {label: 'EPIDEMIC_P_Q', value: 'EPIDEMIC_P_Q'}, 
+                                {label: 'SPRAY_AND_WAIT', value: 'SPRAY_AND_WAIT'}, 
+                                {label: 'BINARY_SPRAY_AND_WAIT', value: 'BINARY_SPRAY_AND_WAIT'}, 
+                                {label: 'DIRECT_DELIVERY', value: 'DIRECT_DELIVERY'}] 
 
         const renderCancelConfirmationFooter = () => {
             return (
@@ -229,33 +279,147 @@ class Simulation extends React.Component{
         
         }
 
-        return(
-            <div className="bs-docs-section" >
-            <Card title = "Simulation">
-                <div className = "col-md-12">
-                    <div className="row">
-                    <div className = "col-md-5">
-                        <FormGroup label = "Number of nodes " htmlFor = "InputNodes">
+        const renderSprayAndWait = () => {
+            if(this.state.protocolType === 'SPRAY_AND_WAIT' || this.state.protocolType === 'BINARY_SPRAY_AND_WAIT')
+                return (
+                    <div className = "col-md-4">
+                            <FormGroup label = "L-Parameter" htmlFor = "sprayAndWaitLParameter">
+                                <input type="number"
+                                        className={"form-control " + this.state.inputSprayAndWaitLParameterErrorClass}
+                                        value = {this.state.sprayAndWaitLParameter}
+                                        name="sprayAndWaitLParameter"
+                                        onChange={this.handleChange}
+                                        id="sprayAndWaitLParameter"
+                                        placeholder="Type Spray_And_Wait L-Parameter"
+                                />
+                                <div className={invalidFeedback}>Set the Spray_And_Wait L-Parameter</div>
+                            </FormGroup> 
+                        </div>
+                )
+        }
+
+        const renderEpidemicPQ = () => {
+            if(this.state.protocolType === 'EPIDEMIC_P_Q' )
+                return (   
+                        <>
+                            <div className = "col-md-4">
+                        <FormGroup label = "P-Parameter" htmlFor = "epidemicPParameter">
                             <input type="number"
-                                    className={"form-control " + this.state.inputEmailErrorClass}
-                                    value = {this.state.numberOfNodes}
-                                    name="numberOfNodes"
+                                    className={"form-control " + this.state.inputEpidemicPParameterErrorClass}
+                                    value = {this.state.epidemicPParameter}
+                                    name="epidemicPParameter"
                                     onChange={this.handleChange}
-                                    id="InputNodes"
-                                    placeholder="Type the number of nodes"
-                                    disabled={this.state.showPairs} 
+                                    id="epidemicPParameter"
+                                    placeholder="Type Epidemic P-Parameter"
                             />
+                            <div className={invalidFeedback}>Set the Epidemic P-Parameter</div>
                         </FormGroup> 
                     </div>
+                    <div className = "col-md-4">
+                        <FormGroup label = "Q-Parameter" htmlFor = "epidemicQParameter">
+                            <input type="number"
+                                    className={"form-control " + this.state.inputEpidemicQParameterErrorClass}
+                                    value = {this.state.epidemicQParameter}
+                                    name="epidemicQParameter"
+                                    onChange={this.handleChange}
+                                    id="epidemicQParameter"
+                                    placeholder="Type Epidemic Q-Parameter"
+                            />
+                            <div className={invalidFeedback}>Set the Epidemic Q-Parameter</div>
+                        </FormGroup> 
+                    </div>
+                    </>
+                )
+        }
+
+        return(
+            <div className="bs-docs-section" >
+                
+            <Card title = "Simulation">
+                <div className = "col-md-12">
+                <div className="row">
+                    <div className = "col-md-5">
+                        <FormGroup label = "Number of Rounds " htmlFor = "InputRounds">
+                            <input type="number"
+                                    className={"form-control " + this.state.inputNumberOfRoundsErrorClass}
+                                    value = {this.state.numberOfRounds}
+                                    name="numberOfRounds"
+                                    onChange={this.handleChange}
+                                    id="InputRounds"
+                                    placeholder="Type the number of rounds"
+                            />
+                            <div className={invalidFeedback}>Set the number of rounds</div>
+                        </FormGroup> 
+                    </div>
+                </div>    
+                
+                <br />
+                
+                <h4>Message Generation</h4>
+                <div className="row">
+                    <div className = "col-md-5">
+                    <FormGroup label = "Type" htmlFor = "messageGenarationType">
+                        <SelectMenu className={"form-control " + this.state.inputMessageGenerationInstantErrorClass}
+                                    name="messageGenarationType"
+                                    list= {messageGenarationTypes} 
+                                    onChange={this.handleSelectChange}
+                        />
+                    </FormGroup>
+                    </div>
+                    <div className = "col-md-5">
+                        <FormGroup label = "Generation Instant (s)" htmlFor = "messageGenerationInstant">
+                            <input type="number"
+                                    className={"form-control " + this.state.inputMessageGenerationInstantErrorClass}
+                                    value = {this.state.messageGenerationInstant}
+                                    name="messageGenerationInstant"
+                                    onChange={this.handleChange}
+                                    id="messageGenerationInstant"
+                                    placeholder="Type the generation instant"
+                            />
+                            <div className={invalidFeedback}>Set the number of rounds</div>
+                        </FormGroup> 
+                    </div>
+                </div>
+
+                <br />
+
+                <h4>Protocol</h4>
+                <div className="row">
+                    <div className = "col-md-4">
+                    <FormGroup label = "Type" htmlFor = "protocolType">
+                        <SelectMenu className={"form-control " + this.state.inputProtocolTypeErrorClass}
+                                    name="protocolType"
+                                    list= {protocolTypes} 
+                                    onChange={this.handleSelectChange}
+                        />
+                    </FormGroup>
                     </div>
                     
-                    {/* <Button 
-                        label="Define Nodes Parameters"
-                        icon="pi pi-pencil"
-                        onClick={this.defineParameters}
-                        style={ {maxHeight: '35px'} }
-                        disabled={this.state.numberOfNodes === null}
-                    /> */}
+                    {renderSprayAndWait()}
+                   
+                    {renderEpidemicPQ()}
+                    
+                </div>
+
+                <br />
+
+                <h4 >Meeting Trace</h4>                
+                <div className="row">
+                <div className = "col-md-5">
+                    <FormGroup label = "Number of nodes " htmlFor = "InputNodes">
+                        <input type="number"
+                                className={"form-control " + this.state.inputEmailErrorClass}
+                                value = {this.state.numberOfNodes}
+                                name="numberOfNodes"
+                                onChange={this.handleChange}
+                                id="InputNodes"
+                                placeholder="Type the number of nodes"
+                                disabled={this.state.showPairs} 
+                        />
+                    </FormGroup> 
+                </div>
+                </div>
+                    
                     {   this.state.showPairs ?
                     (
                     <>
@@ -287,7 +451,7 @@ class Simulation extends React.Component{
                             <SelectMenu className={"form-control " }
                                         name="minNode1Index"
                                         list= {minNodeIndexes} 
-                                        onChange={this.handleSelectChange}
+                                        onChange={this.handleSelectNodeChange}
                             />
                         </FormGroup>
                     </div>
@@ -296,7 +460,7 @@ class Simulation extends React.Component{
                             <SelectMenu className={"form-control " }
                                         name="maxNode1Index"
                                         list= {maxNode1Indexes} 
-                                        onChange={this.handleSelectChange}
+                                        onChange={this.handleSelectNodeChange}
                             />
                         </FormGroup>
                     </div>
@@ -309,7 +473,7 @@ class Simulation extends React.Component{
                             <SelectMenu className={"form-control " }
                                         name="minNode2Index"
                                         list= {minNodeIndexes} 
-                                        onChange={this.handleSelectChange}
+                                        onChange={this.handleSelectNodeChange}
                             />
                         </FormGroup>
                     </div>
@@ -318,7 +482,7 @@ class Simulation extends React.Component{
                             <SelectMenu className={"form-control " }
                                         name="maxNode2Index"
                                         list= {maxNode2Indexes} 
-                                        onChange={this.handleSelectChange}
+                                        onChange={this.handleSelectNodeChange}
                             />
                         </FormGroup>
                     </div>
@@ -359,7 +523,9 @@ class Simulation extends React.Component{
                             />
                         ) : (<div />)
                     }
+
                     <br />
+                    
                     <div className="row">
                     <div className = "col-md-5">
                         <FormGroup label = "Total simulation time " htmlFor = "InputTime">
@@ -372,15 +538,6 @@ class Simulation extends React.Component{
                                     placeholder="Type the total simulation time" 
                             />
                             <div className="invalid-feedback">{this.state.errorSimulationTimeMessage}</div>
-                        </FormGroup>
-                    </div>
-                    <div className = "col-md-1">
-                        <FormGroup label = "Unity " htmlFor = "InputUnity">
-                            <SelectMenu className={"form-control " }
-                                        name="timeUnitty"
-                                        list= {timeUnityList}
-                                        onChange={this.handleChange}
-                            />
                         </FormGroup>
                     </div>
                     </div>

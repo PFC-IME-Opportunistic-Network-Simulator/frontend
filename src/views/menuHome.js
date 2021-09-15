@@ -11,8 +11,7 @@ class MenuHome extends React.Component{
         return(
             <div className="bs-docs-section" >
                 <Card title="Create simulation">
-                    Define your network simulation parameters such as the number of nodes and the encounter rates
-                    to perform your simulation
+                    Define your network scenario to perform your simulation.
                     <br />
                     <a href="#/simulation"> 
                     <Button 

@@ -3,7 +3,6 @@ import React from 'react'
 import { Dialog } from 'primereact/dialog'
 import { RadioButton } from 'primereact/radiobutton';
 
-import SelectMenu from '../selectMenu'
 import DialogFooter from '../dialogFooter'
 import ConfirmationDialog from '../confirmationDialog'
 
@@ -18,18 +17,15 @@ class ConfigurePairDialog extends React.Component {
         rate: null,
         inputRateErrorClass: '',
         errorRateMessage: '',
+        
         variableRate: variableRateFalseObj,
         variabilityDegree: null,
         inputVariabilityDegreeErrorClass: '',
         errorVariabilityDegreeMessage: '',
+        
         didUpdated: false,
         visibleConfirmDialog: false,
     }
-
-    // constructor(){
-    //     super();
-        
-    // }
 
     componentDidUpdate(){
         if(this.props.visible && !this.state.didUpdated){

@@ -31,8 +31,8 @@ class SimulationTable extends React.Component{
 
     configurePairs = (parameters) => {
         this.setState({displayConfigurePairsDialog: false})
-        this.setState({selectedPairs: []})
         this.props.configurePairs(parameters, this.state.selectedPairs)
+        this.setState({selectedPairs: []})
     }
 
     desconfigurePairs = () => {
@@ -80,7 +80,7 @@ class SimulationTable extends React.Component{
                                 loading={this.props.loading}
                         dataKey="id" paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} nodes"
                         >
 
                         <Column selectionMode="multiple" headerStyle={{ width: '4px' }}></Column>
