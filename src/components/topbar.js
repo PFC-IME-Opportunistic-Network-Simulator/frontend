@@ -1,6 +1,5 @@
 import React from 'react'
 import { Menubar } from 'primereact/menubar'
-import UserMenu from './navbar/userMenu';
 
 class Topbar extends React.Component {
 
@@ -10,12 +9,11 @@ class Topbar extends React.Component {
             // {label: 'Usuários', icon: 'pi pi-user', command: () => {window.location="#/signUp"}}, 
             {label: "Modules", icon: 'pi pi-list',
                 items: [
-                    {label: "Simulation", icon: 'pi pi-desktop', command: ()=> {window.location="#/simulation"}},
+                    {label: "Simulation", icon: 'pi pi-desktop', command: ()=> {window.location="#/simulation"}, url:'#/simulation'},
+                    {label: "Help", icon: 'pi pi-info-circle', url:"https://github.com/PFC-IME-Opportunistic-Network-Simulator/backend/blob/master/README-usage.md"}
                 ]
             }
         ]
-        // const start = <UserMenu render = {this.context.isAuth} endSession = {this.context.endSession} />;
-        // const end = <UserMenu isAuth = {this.context.isAuth} endSession = {this.context.endSession} />;
         return (
             <div>
                 <div className="card">

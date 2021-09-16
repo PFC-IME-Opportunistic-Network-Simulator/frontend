@@ -15,8 +15,21 @@ class MenuHome extends React.Component{
                     <br />
                     <a href="#/simulation"> 
                     <Button 
-                            label="Go to simulation"
+                            label="Simulation"
                             icon="pi pi-desktop"
+                            style={ {maxHeight: '35px', marginTop: '5px'} }
+                        />
+                    </a>
+
+                </Card>
+
+                <Card title="Help">
+                    Access the usage instructions learn to about run simluaton.
+                    <br />
+                    <a href="https://github.com/PFC-IME-Opportunistic-Network-Simulator/backend/blob/master/README-usage.md"> 
+                    <Button 
+                            label="Help"
+                            icon="pi pi-info-circle"
                             style={ {maxHeight: '35px', marginTop: '5px'} }
                         />
                     </a>

@@ -19,7 +19,7 @@ const visiblePairsTrueOption = {name: 'All', key: true}
 const visiblePairsFalseOption = {name: 'Just not configured yet', key: false}
 const inputErrorClass = "is-invalid"
 const invalidFeedback = "invalid-feedback"
-const integerInput = ["numberOfRounds"]
+const integerInput = ["numberOfRounds", "sourceNodeId", 'destinationNodeId']
 
 class Simulation extends React.Component{
 
@@ -29,11 +29,8 @@ class Simulation extends React.Component{
         errorNumberOfRoundsMessage: '',
 
         messageGenarationType: '',
-
-        messageGenerationInstant: null,
-        inputMessageGenerationInstantErrorClass: '',
-        errorMessageGenerationInstantMessage: '',
-
+        inputMessageGenerationTypeErrorClass: '',
+        
         protocolType: null,
         inputProtocolTypeErrorClass: '',
         errorProtocolTypeMessage: '',
@@ -58,6 +55,18 @@ class Simulation extends React.Component{
         totalSimulationTime: null,
         inputSimulationTimeErrorClass: '',
         errorSimulationTimeMessage: '',
+        
+        messageGenerationInstant: null,
+        inputMessageGenerationInstantErrorClass: '',
+        errorMessageGenerationInstantMessage: '',
+        
+        sourceNodeId: null,
+        inputSourceNodeIdErrorClass: '',
+        errorSourceNodeIdMessage: '',
+
+        destinationNodeId: null,
+        inputDestinationNodeIdErrorClass: '',
+        errorDestinationNodeIdMessage: '',
 
         pairs: [],
         filteredPairs: [],
@@ -69,7 +78,9 @@ class Simulation extends React.Component{
         maxNode2Index: null,
         meetingTrace: null,
         messagesResponse: null,
-        displayMeetingTrace: false,   
+        displayMeetingTrace: false,
+        
+        alreadyChecked: false
     }
 
     constructor(){
@@ -77,20 +88,45 @@ class Simulation extends React.Component{
         this.simulationService = new SimulationService()
     }
 
-    handleChange = event => {
+    handleChange = async event => {
         var value = event.target.value
         const name = event.target.name
         if(value < 0)
             value = -value
-        if(integerInput.includes(name))
-            value = value.replace(/\D/,'')
-        this.setState({ [name]: value })
+        try{
+            if(integerInput.includes(name))
+                value = value.toString().replace(/\D/,'')
+        } catch(error){
+            value = null
+        }
+        await this.setState({ [name]: value })
+
+        if(this.state.alreadyChecked){
+            this.resetView()
+            this.checkData()
+        }
     }
 
-    handleSelectChange = event =>{
+    handleSelectChange = async event => {
         const value = event.target.value
         const name = event.target.name
-        this.setState({ [name]: value === '' ? null : value })
+        await this.setState({ [name]: value === '' ? null : value })
+
+        if(this.state.alreadyChecked){
+            this.resetView()
+            this.checkData()
+        }
+    }
+
+    handleSelectProtocolTypeChange = event => {
+        this.resetProtocolParameters()
+        this.handleSelectChange(event)
+    }
+
+    resetProtocolParameters = () => {
+        this.setState({sprayAndWaitLParameter: null})
+        this.setState({epidemicPParameter: null})
+        this.setState({epidemicQParameter: null})
     }
 
     handleSelectNodeChange = async event => {
@@ -115,8 +151,8 @@ class Simulation extends React.Component{
             warningPopUp('Number of nodes must be greater than 1')
             return
         }
-        for(var i = 1; i <= this.state.numberOfNodes; i++){
-            for(var j = i+1; j <=  this.state.numberOfNodes; j++){
+        for(var i = 0; i < this.state.numberOfNodes; i++){
+            for(var j = i+1; j <  this.state.numberOfNodes; j++){
                     pairs.push({
                         id: id++,
                         node1: i,
@@ -167,27 +203,129 @@ class Simulation extends React.Component{
 
     checkData = () => {
         var check = true
-
-        if(!this.state.totalSimulationTime) {
-            this.setState({inputSimulationTimeErrorClass: inputErrorClass})
-            this.setState({errorSimulationTimeMessage: 'Simulation time is required'})
+        
+        if(!this.state.numberOfRounds){
+            this.setState({inputNumberOfRoundsErrorClass: inputErrorClass})
             check = false
         }
 
-        for(var i = 0; i < this.state.pairs.length; i++){
-            if(!this.state.pairs[i].configured){
-                errorPopUp('There are not configured pairs yet')
+        if(!this.state.protocolType){
+            this.setState({inputProtocolTypeErrorClass: inputErrorClass})
+            check = false
+        } else if(this.state.protocolType === 'SPRAY_AND_WAIT' || this.state.protocolType === 'BINARY_SPRAY_AND_WAIT'){
+            if(!this.state.sprayAndWaitLParameter){
+                this.setState({inputSprayAndWaitLParameterErrorClass: inputErrorClass})
                 check = false
-                break
             }
         }
+        else if(this.state.protocolType === 'EPIDEMIC_P_Q'){
+            if(!this.state.epidemicPParameter){
+                this.setState({inputEpidemicPParameterErrorClass: inputErrorClass})
+                this.setState({errorEpidemicPParameterMessage: 'Set the P-Parameter'})
+                check = false
+            } else if(this.state.epidemicPParameter > 1){
+                this.setState({inputEpidemicPParameterErrorClass: inputErrorClass})
+                this.setState({errorEpidemicPParameterMessage: 'P must be a value in interval [0, 1]'})
+                check = false
+            }
+            if(!this.state.epidemicQParameter){
+                this.setState({inputEpidemicQParameterErrorClass: inputErrorClass})
+                this.setState({errorEpidemicQParameterMessage: 'Set the Q-Parameter'})
+                check = false
+            } else if(this.state.epidemicQParameter > 1){
+                this.setState({inputEpidemicQParameterErrorClass: inputErrorClass})
+                this.setState({errorEpidemicQParameterMessage: 'Q must be a value in interval [0, 1]'})
+                check = false
+            }
+        }
+        
+       
+        if(this.state.pairs.length === 0){
+            this.setState({inputNumberOfNodesErrorClass: inputErrorClass})
+            this.setState({errorNumberOfNodesMessage: 'There are not configured pairs'})
+            check = false
+        } else{
+            for(var i = 0; i < this.state.pairs.length; i++){
+                console.log('pair: ', this.state.pairs[i])
+                if(!this.state.pairs[i].configured){
+                    console.log('not configured')
+                    this.setState({inputNumberOfNodesErrorClass: inputErrorClass})
+                    this.setState({errorNumberOfNodesMessage: 'There are not configured pairs'})
+                    check = false
+                    break
+                }
+            }
+        }
+
+        if(!this.state.numberOfNodes){
+            this.setState({inputNumberOfNodesErrorClass: inputErrorClass})
+            this.setState({errorNumberOfNodesMessage: 'Set the number of nodes'})
+            check = false
+        } 
+
+        if(!this.state.totalSimulationTime) {
+            this.setState({inputSimulationTimeErrorClass: inputErrorClass})
+            check = false
+        }
+
+        if(!this.state.messageGenarationType) {
+            this.setState({inputMessageGenerationTypeErrorClass: inputErrorClass})
+            check = false
+        } else if(this.state.messageGenarationType === 'FIXED_NODES') {
+            if(!this.state.sourceNodeId){
+                this.setState({inputSourceNodeIdErrorClass: inputErrorClass})
+                this.setState({errorSourceNodeIdMessage: 'Set the source node id'})
+                check = false
+            } 
+            else if(parseInt(this.state.sourceNodeId) >= parseInt(this.state.numberOfNodes)){
+                this.setState({inputSourceNodeIdErrorClass: inputErrorClass})
+                this.setState({errorSourceNodeIdMessage: 'Node id must be in interval [' + 0 +', ' + (parseInt(this.state.numberOfNodes)-1) + ']'})
+                check = false
+            }
+            
+            if(!this.state.destinationNodeId){
+                this.setState({inputDestinationNodeIdErrorClass: inputErrorClass})
+                this.setState({errorDestinationNodeIdMessage: 'Set the destination node id'})
+                check = false
+            } else if(parseInt(this.state.destinationNodeId) >= parseInt(this.state.numberOfNodes)){
+                this.setState({inputDestinationNodeIdErrorClass: inputErrorClass})
+                this.setState({errorDestinationNodeIdMessage: 'Node id must be in interval [' + 0 +', ' + (parseInt(this.state.numberOfNodes)-1) + ']'})
+                check = false
+            }
+        }
+    
+
+        if(!this.state.messageGenerationInstant) {
+            this.setState({inputMessageGenerationInstantErrorClass: inputErrorClass})
+            check = false
+        }
+
+        this.setState({alreadyChecked: true})
 
         return check
     }
 
     resetView = () => {
+        this.setState({inputNumberOfRoundsErrorClass: ''})
+        
+        this.setState({inputProtocolTypeErrorClass: ''})
+        this.setState({errorProtocolTypeMessage: ''})
+        this.setState({inputSprayAndWaitLParameterErrorClass: ''})
+        this.setState({errorSprayAndWaitLParameterMessage: ''})
+        this.setState({inputEpidemicPParameterErrorClass: ''})
+        this.setState({errorEpidemicPParameterMessage: ''})
+        this.setState({inputEpidemicQParameterErrorClass: ''})
+        this.setState({errorEpidemicQParameterMessage: ''})
+
+        this.setState({inputNumberOfNodesErrorClass: ''})
         this.setState({inputSimulationTimeErrorClass: ''})
         this.setState({errorSimulationTimeMessage: ''})
+
+        this.setState({inputMessageGenerationTypeErrorClass: ''})
+        this.setState({inputMessageGenerationInstantErrorClass: ''})
+        this.setState({inputSourceNodeIdErrorClass: ''})
+        this.setState({inputDestinationNodeIdErrorClass: ''})
+
     }
 
     callSimulation = () => {
@@ -213,13 +351,13 @@ class Simulation extends React.Component{
     }
 
     cancelDefineParameters = () => {
-        // this.setState({numberOfNodes: ''})
+        this.setState({numberOfNodes: ''})
         // this.setState({totalSimulationTime: ''})
-        // this.setState({pairs: []})
-        // this.setState({showPairs: false})
-        // this.setState({displayMeetingTrace: false})
-        // this.setState({displayCancelConfimation: false})
-        window.location.reload()
+        this.setState({pairs: []})
+        this.setState({showPairs: false})
+        this.setState({displayMeetingTrace: false})
+        this.setState({displayCancelConfimation: false})
+        // window.location.reload()
     }
 
     filterPairs = () => {
@@ -303,7 +441,7 @@ class Simulation extends React.Component{
                 return (   
                         <>
                             <div className = "col-md-4">
-                        <FormGroup label = "P-Parameter" htmlFor = "epidemicPParameter">
+                        <FormGroup label = "P-Parameter (0-1)" htmlFor = "epidemicPParameter">
                             <input type="number"
                                     className={"form-control " + this.state.inputEpidemicPParameterErrorClass}
                                     value = {this.state.epidemicPParameter}
@@ -312,11 +450,11 @@ class Simulation extends React.Component{
                                     id="epidemicPParameter"
                                     placeholder="Type Epidemic P-Parameter"
                             />
-                            <div className={invalidFeedback}>Set the Epidemic P-Parameter</div>
+                            <div className={invalidFeedback}>{this.state.errorEpidemicPParameterMessage}</div>
                         </FormGroup> 
                     </div>
                     <div className = "col-md-4">
-                        <FormGroup label = "Q-Parameter" htmlFor = "epidemicQParameter">
+                        <FormGroup label = "Q-Parameter (0-1)" htmlFor = "epidemicQParameter">
                             <input type="number"
                                     className={"form-control " + this.state.inputEpidemicQParameterErrorClass}
                                     value = {this.state.epidemicQParameter}
@@ -325,8 +463,43 @@ class Simulation extends React.Component{
                                     id="epidemicQParameter"
                                     placeholder="Type Epidemic Q-Parameter"
                             />
-                            <div className={invalidFeedback}>Set the Epidemic Q-Parameter</div>
+                            <div className={invalidFeedback}>{this.state.errorEpidemicQParameterMessage}</div>
                         </FormGroup> 
+                    </div>
+                    </>
+                )
+        }
+
+        const renderFixedNodesMessageGeneration = () => {
+            if(this.state.messageGenarationType === 'FIXED_NODES')
+                return (
+                    <>
+                    <div className = "col-md-3">
+                        <FormGroup label = "Source Node ID " htmlFor = "InputSourceNode">
+                            <input type="number"
+                                    className={"form-control " + this.state.inputSourceNodeIdErrorClass}
+                                    value = {this.state.sourceNodeId}
+                                    name="sourceNodeId"
+                                    onChange={this.handleChange}
+                                    id="InputSourceNode"
+                                    placeholder="Type the source node id"
+                            />
+                            <div className={invalidFeedback}>{this.state.errorSourceNodeIdMessage}</div>
+                        </FormGroup> 
+                    </div>
+
+                    <div className = "col-md-3">
+                    <FormGroup label = "Destination Node ID " htmlFor = "InputDestinationNode">
+                        <input type="number"
+                                className={"form-control " + this.state.inputDestinationNodeIdErrorClass}
+                                value = {this.state.destinationNodeId}
+                                name="destinationNodeId"
+                                onChange={this.handleChange}
+                                id="InputDestinationNode"
+                                placeholder="Type the destination node id"
+                        />
+                        <div className={invalidFeedback}>{this.state.errorDestinationNodeIdMessage}</div>
+                    </FormGroup> 
                     </div>
                     </>
                 )
@@ -339,7 +512,7 @@ class Simulation extends React.Component{
                 <div className = "col-md-12">
                 <div className="row">
                     <div className = "col-md-5">
-                        <FormGroup label = "Number of Rounds " htmlFor = "InputRounds">
+                        <FormGroup label = "Number of rounds " htmlFor = "InputRounds">
                             <input type="number"
                                     className={"form-control " + this.state.inputNumberOfRoundsErrorClass}
                                     value = {this.state.numberOfRounds}
@@ -355,34 +528,6 @@ class Simulation extends React.Component{
                 
                 <br />
                 
-                <h4>Message Generation</h4>
-                <div className="row">
-                    <div className = "col-md-5">
-                    <FormGroup label = "Type" htmlFor = "messageGenarationType">
-                        <SelectMenu className={"form-control " + this.state.inputMessageGenerationInstantErrorClass}
-                                    name="messageGenarationType"
-                                    list= {messageGenarationTypes} 
-                                    onChange={this.handleSelectChange}
-                        />
-                    </FormGroup>
-                    </div>
-                    <div className = "col-md-5">
-                        <FormGroup label = "Generation Instant (s)" htmlFor = "messageGenerationInstant">
-                            <input type="number"
-                                    className={"form-control " + this.state.inputMessageGenerationInstantErrorClass}
-                                    value = {this.state.messageGenerationInstant}
-                                    name="messageGenerationInstant"
-                                    onChange={this.handleChange}
-                                    id="messageGenerationInstant"
-                                    placeholder="Type the generation instant"
-                            />
-                            <div className={invalidFeedback}>Set the number of rounds</div>
-                        </FormGroup> 
-                    </div>
-                </div>
-
-                <br />
-
                 <h4>Protocol</h4>
                 <div className="row">
                     <div className = "col-md-4">
@@ -390,7 +535,7 @@ class Simulation extends React.Component{
                         <SelectMenu className={"form-control " + this.state.inputProtocolTypeErrorClass}
                                     name="protocolType"
                                     list= {protocolTypes} 
-                                    onChange={this.handleSelectChange}
+                                    onChange={this.handleSelectProtocolTypeChange}
                         />
                     </FormGroup>
                     </div>
@@ -408,7 +553,7 @@ class Simulation extends React.Component{
                 <div className = "col-md-5">
                     <FormGroup label = "Number of nodes " htmlFor = "InputNodes">
                         <input type="number"
-                                className={"form-control " + this.state.inputEmailErrorClass}
+                                className={"form-control " + this.state.inputNumberOfNodesErrorClass}
                                 value = {this.state.numberOfNodes}
                                 name="numberOfNodes"
                                 onChange={this.handleChange}
@@ -416,6 +561,7 @@ class Simulation extends React.Component{
                                 placeholder="Type the number of nodes"
                                 disabled={this.state.showPairs} 
                         />
+                        <div className={invalidFeedback}>{this.state.errorNumberOfNodesMessage}</div>
                     </FormGroup> 
                 </div>
                 </div>
@@ -528,7 +674,7 @@ class Simulation extends React.Component{
                     
                     <div className="row">
                     <div className = "col-md-5">
-                        <FormGroup label = "Total simulation time " htmlFor = "InputTime">
+                        <FormGroup label = "Total simulation time (s) " htmlFor = "InputTime">
                             <input type="number"
                                     className={"form-control " + this.state.inputSimulationTimeErrorClass}
                                     value = {this.state.totalSimulationTime}
@@ -541,21 +687,46 @@ class Simulation extends React.Component{
                         </FormGroup>
                     </div>
                     </div>
-                    {
-                        this.state.showPairs ?
-                        (
-                            <Button 
-                                label="Start Simulation"
-                                icon="pi pi-desktop"
-                                onClick={this.callSimulation}
-                                style={ {maxHeight: '35px'} }
-                                // disabled={this.state.numberOfNodes === null}
-                            /> 
 
-                        ) : (
-                            <div />
-                        )
-                    }
+                    <br />
+
+                <h4>Message Generation</h4>
+                <div className="row">
+                    <div className = "col-md-3">
+                    <FormGroup label = "Type" htmlFor = "messageGenarationType">
+                        <SelectMenu className={"form-control " + this.state.inputMessageGenerationTypeErrorClass}
+                                    name="messageGenarationType"
+                                    list= {messageGenarationTypes} 
+                                    onChange={this.handleSelectChange}
+                        />
+                    </FormGroup>
+                    </div>
+
+                    {renderFixedNodesMessageGeneration()}
+
+                    <div className = "col-md-3">
+                        <FormGroup label = "Generation instant (s)" htmlFor = "messageGenerationInstant">
+                            <input type="number"
+                                    className={"form-control " + this.state.inputMessageGenerationInstantErrorClass}
+                                    value = {this.state.messageGenerationInstant}
+                                    name="messageGenerationInstant"
+                                    onChange={this.handleChange}
+                                    id="messageGenerationInstant"
+                                    placeholder="Type the generation instant"
+                            />
+                            <div className={invalidFeedback}>Set the generation instant</div>
+                        </FormGroup> 
+                    </div>
+                </div>
+
+                    <br />
+                    <Button 
+                        label="Start Simulation"
+                        icon="pi pi-desktop"
+                        onClick={this.callSimulation}
+                        style={ {maxHeight: '35px'} }
+                        // disabled={this.state.numberOfNodes === null}
+                    />
                     {
                         this.state.displayMeetingTrace ? (
                             <div>
@@ -597,7 +768,7 @@ class Simulation extends React.Component{
                         onHide={() => this.setState({displayConfirmation: false})}>
                     <div className="confirmation-content row" style={{marginLeft: '10px'}}>
                         <i className="pi pi-exclamation-triangle p-mr-3" style={{ fontSize: '2rem', marginRight: '10px'}} />
-                        <div style={{marginBottom: '10px'}}> Confirm delete configuration? </div>
+                        <div style={{marginBottom: '10px'}}> Cancel meeting trace configuration? </div>
                     </div>
             </Dialog>
             <div className="d-flex "/>
