@@ -6,6 +6,11 @@ class SimulationService extends ApiService{
         super('/api/simulation')
     }
 
+    runSimulation(simulationData){
+        console.log('send: ', simulationData)
+        return this.post('/runSimulation', simulationData)
+    }
+
     static minNodeIndexes(numberOfNodes){
         var indexList = [{label: null, value: null}]
         for (var i = 1; i <= numberOfNodes; i++) {
@@ -41,11 +46,6 @@ class SimulationService extends ApiService{
             )
         return responseMessage
     }
-
-    generateMeetingTrace(simulationData){
-        return this.post('/executeSimulation', simulationData)
-    }
-
 
 }
 

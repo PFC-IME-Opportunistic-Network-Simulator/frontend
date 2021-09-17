@@ -48,6 +48,7 @@ class Simulation extends React.Component{
         errorEpidemicQParameterMessage: '',
 
         numberOfNodes: null,
+        meetingTraceGeneratorType: 'EXPONENTIAL',
         inputNumberOfNodesErrorClass: '',
         errorNumberOfNodesMessage: '',
         visiblePairs: visiblePairsFalseOption,
@@ -246,7 +247,6 @@ class Simulation extends React.Component{
             check = false
         } else{
             for(var i = 0; i < this.state.pairs.length; i++){
-                console.log('pair: ', this.state.pairs[i])
                 if(!this.state.pairs[i].configured){
                     console.log('not configured')
                     this.setState({inputNumberOfNodesErrorClass: inputErrorClass})
@@ -331,20 +331,37 @@ class Simulation extends React.Component{
     callSimulation = () => {
         this.resetView()
         if(this.checkData()){
-            this.simulationService.generateMeetingTrace({
-                pairsList: this.state.pairs,
-                numberOfNodes: this.state.numberOfNodes,
-                totalSimulationTime: this.state.totalSimulationTime
+            this.simulationService.runSimulation({
+                numberOfRounds: this.state.numberOfRounds,
+                protocolConfiguration: {
+                    type: this.state.protocolType,
+                    p: this.state.epidemicPParameter,
+                    q: this.state.epidemicQParameter,
+                    l: this.state.sprayAndWaitLParameter
+                },
+                meetingTraceConfiguration: {
+                    type: this.state.meetingTraceGeneratorType,
+                    totalSimulationTime: this.state.totalSimulationTime,
+                    pairList: this.state.pairs
+                },
+                messageConfiguration: {
+                    type: this.state.messageGenarationType,
+                    sourceNodeId: this.state.sourceNodeId,
+                    destinationNodeId: this.state.destinationNodeId,
+                    generationInstant: this.state.messageGenerationInstant,
+                    amountNodes: this.state.numberOfNodes
+                }
             }).then(response => {
-                this.setState({displayMeetingTrace: true})
-                const meetingTrace= this.simulationService.parseMeetingTrace(response.data.meetingTrace)
-                this.setState({meetingTrace})
-                const messagesResponse = this.simulationService.parseMessages(response.data.messages)
-                this.setState({messagesResponse})
+                console.log(response.data)
+                // this.setState({displayMeetingTrace: true})
+                // const meetingTrace= this.simulationService.parseMeetingTrace(response.data.meetingTrace)
+                // this.setState({meetingTrace})
+                // const messagesResponse = this.simulationService.parseMessages(response.data.messages)
+                // this.setState({messagesResponse})
             })
             .catch(error => {
-               console.log(error)
-               errorPopUp(error.response)
+            //    console.log(error)
+            //    errorPopUp(error.response)
             }
             )
         }
