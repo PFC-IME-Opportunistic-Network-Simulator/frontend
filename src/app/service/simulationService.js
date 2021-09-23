@@ -7,20 +7,19 @@ class SimulationService extends ApiService{
     }
 
     runSimulation(simulationData){
-        console.log('send: ', simulationData)
         return this.post('/runSimulation', simulationData)
     }
 
     static minNodeIndexes(numberOfNodes){
         var indexList = [{label: null, value: null}]
-        for (var i = 1; i <= numberOfNodes; i++) {
+        for (var i = 0; i < numberOfNodes; i++) {
             indexList.push({label: i, value: i})
         }
        return indexList
     }
     static maxNodeIndexes(numberOfNodes, minNodeIndex){
         var indexList = [{label: null, value: null}]
-        for (var i = minNodeIndex !==null ? minNodeIndex : 1; i <= numberOfNodes; i++) {
+        for (var i = minNodeIndex !==null ? minNodeIndex : 0; i < numberOfNodes; i++) {
             indexList.push({label: i, value: i})
         }
        return indexList

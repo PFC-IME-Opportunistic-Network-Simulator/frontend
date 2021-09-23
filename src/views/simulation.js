@@ -79,9 +79,13 @@ class Simulation extends React.Component{
         maxNode2Index: null,
         meetingTrace: null,
         messagesResponse: null,
-        displayMeetingTrace: false,
         
-        alreadyChecked: false
+        alreadyChecked: false,
+
+        simulationInProgress: false,
+        simulationFinished: false,
+        simulationError: false,
+        simulationReport: '',
     }
 
     constructor(){
@@ -306,6 +310,9 @@ class Simulation extends React.Component{
     }
 
     resetView = () => {
+
+        this.setState({simulationFinished: false})
+
         this.setState({inputNumberOfRoundsErrorClass: ''})
         
         this.setState({inputProtocolTypeErrorClass: ''})
@@ -331,6 +338,7 @@ class Simulation extends React.Component{
     callSimulation = () => {
         this.resetView()
         if(this.checkData()){
+            this.setState({simulationInProgress: true})
             this.simulationService.runSimulation({
                 numberOfRounds: this.state.numberOfRounds,
                 protocolConfiguration: {
@@ -353,15 +361,14 @@ class Simulation extends React.Component{
                 }
             }).then(response => {
                 console.log(response.data)
-                // this.setState({displayMeetingTrace: true})
-                // const meetingTrace= this.simulationService.parseMeetingTrace(response.data.meetingTrace)
-                // this.setState({meetingTrace})
-                // const messagesResponse = this.simulationService.parseMessages(response.data.messages)
-                // this.setState({messagesResponse})
+                this.setState({simulationReport: JSON.stringify(response.data, null, 2)})
+                this.setState({simulationInProgress: false})
+                this.setState({simulationFinished: true})
             })
             .catch(error => {
-            //    console.log(error)
-            //    errorPopUp(error.response)
+                this.setState({simulationInProgress: false})
+                this.setState({simulationError: true})
+                errorPopUp(error.response.data)
             }
             )
         }
@@ -372,7 +379,6 @@ class Simulation extends React.Component{
         // this.setState({totalSimulationTime: ''})
         this.setState({pairs: []})
         this.setState({showPairs: false})
-        this.setState({displayMeetingTrace: false})
         this.setState({displayCancelConfimation: false})
         // window.location.reload()
     }
@@ -520,6 +526,50 @@ class Simulation extends React.Component{
                     </div>
                     </>
                 )
+        }
+
+        const renderStartButton = () => {
+            if(this.state.simulationInProgress) {
+                return (
+                    <Button 
+                        label="Running Simulation"
+                        icon="pi pi-desktop"
+                        onClick={this.callSimulation}
+                        style={ {maxHeight: '35px'} }
+                        disabled
+                    />
+                )
+            }
+            return (
+                <Button 
+                        label="Start Simulation"
+                        icon="pi pi-desktop"
+                        onClick={this.callSimulation}
+                        style={ {maxHeight: '35px'} }
+                    />
+            )
+        }
+
+        const renderReport = () => {
+
+            if(this.state.simulationFinished) {
+                return(
+                    <div>
+                    <br />
+                    <div className="row">
+                    <div className = "col-md-6">
+                        <FormGroup label = "Simulation Report " htmlFor = "simulationReport">
+                            <textarea   className={"form-control " }
+                                        id="simulationReport"
+                                        name="simulationReport"
+                                        value={this.state.simulationReport}
+                                        style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
+                        </FormGroup>
+                    </div>
+                    </div>
+                    </div>
+                )
+            }
         }
 
         return(
@@ -737,44 +787,10 @@ class Simulation extends React.Component{
                 </div>
 
                     <br />
-                    <Button 
-                        label="Start Simulation"
-                        icon="pi pi-desktop"
-                        onClick={this.callSimulation}
-                        style={ {maxHeight: '35px'} }
-                        // disabled={this.state.numberOfNodes === null}
-                    />
-                    {
-                        this.state.displayMeetingTrace ? (
-                            <div>
-                                <br />
-                                <div className="row">
-                                <div className = "col-md-6">
-                                    <FormGroup label = "Meeting Trace " htmlFor = "outputMeetingTrace">
-                                        <textarea   className={"form-control " }
-                                                    id="outputMeetingTrace"
-                                                    name="meetingTrace"
-                                                    value={this.state.meetingTrace}
-                                                    style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
-                                    </FormGroup>
-                                </div>
-                                <div className = "col-md-6">
-                                    <FormGroup label = "Messages Response " htmlFor = "outputMessagesResponse">
-                                        <textarea   className={"form-control " }
-                                                    id="outputMessagesResponse"
-                                                    name="messagesResponse"
-                                                    value={this.state.messagesResponse}
-                                                    style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
-                                    </FormGroup>
-                                </div>
-                                </div>
-                            </div>
-                        ) :
-                        (
-                            <div />
-                        )
-
-                    }
+                    {renderStartButton()}
+                    
+                    {renderReport()}
+                    
                 </div>
             </Card>
             <Dialog header="Delete Configuration"

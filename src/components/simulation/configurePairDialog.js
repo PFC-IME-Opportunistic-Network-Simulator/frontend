@@ -45,8 +45,10 @@ class ConfigurePairDialog extends React.Component {
     }
 
     handleChange = (event) => {
-        const value = event.target.value
+        var value = event.target.value
         const name = event.target.name
+        if(value < 0)
+        value = -value
         this.setState({ [name]: value })
     }
 
@@ -73,7 +75,12 @@ class ConfigurePairDialog extends React.Component {
         if(this.state.variableRate.key){
             if(!this.state.variabilityDegree){
                 this.setState({inputVariabilityDegreeErrorClass: inputErrorClass})
-                this.setState({errorVariabilityDegreeMessage:"Variability Degree is required when rate is variable"})
+                this.setState({errorVariabilityDegreeMessage:"Variability degree is required when rate is variable"})
+                check = false
+            }
+            else if(parseFloat(this.state.variabilityDegree) >=1 ){
+                this.setState({inputVariabilityDegreeErrorClass: inputErrorClass})
+                this.setState({errorVariabilityDegreeMessage:"Variability degree must be in interval [0-1]"})
                 check = false
             }
         }
@@ -114,7 +121,7 @@ class ConfigurePairDialog extends React.Component {
                     footer={productDialogFooter}
                     onHide={this.hideDialog}>
                 <div className="p-field">
-                    <label htmlFor="rate">Rate</label>
+                    <label htmlFor="rate">Rate (s<sup>-1</sup>) </label>
                     <input type="number"
                             className={"form-control " + this.state.inputRateErrorClass}
                             value = {this.state.rate}
@@ -141,7 +148,7 @@ class ConfigurePairDialog extends React.Component {
                 }
                 <br/>
                 <div className="p-field">
-                    <label htmlFor="ncm">Variability Degree</label>
+                    <label htmlFor="ncm">Variability Degree (0-1) </label>
                     <input type="number"
                             className={"form-control " + this.state.inputVariabilityDegreeErrorClass}
                             value = {this.state.variabilityDegree}
