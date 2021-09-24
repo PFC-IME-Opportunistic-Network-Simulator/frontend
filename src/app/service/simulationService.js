@@ -6,6 +6,10 @@ class SimulationService extends ApiService{
         super('/api/simulation')
     }
 
+    download(){
+        return this.get('/download')
+    }
+
     runSimulation(simulationData){
         return this.post('/runSimulation', simulationData)
     }
