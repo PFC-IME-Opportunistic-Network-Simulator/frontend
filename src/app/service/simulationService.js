@@ -10,6 +10,12 @@ class SimulationService extends ApiService{
         return this.post('/runSimulation', simulationData)
     }
 
+    getProgress(simulationProgressKey){
+        let params = `?`
+        params = `${params}&key=${simulationProgressKey}`
+        return this.get(`/getSimulationProgress${params}`)
+    }
+
     static minNodeIndexes(numberOfNodes){
         var indexList = [{label: null, value: null}]
         for (var i = 0; i < numberOfNodes; i++) {

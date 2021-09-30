@@ -9,11 +9,13 @@ import SelectMenu from '../components/selectMenu'
 import { Button } from 'primereact/button'
 import { Dialog } from 'primereact/dialog'
 import { RadioButton } from 'primereact/radiobutton'
+import { ProgressBar } from 'primereact/progressbar'
 
 import SimulationTable from '../components/simulation/simulationTable'
 import SimulationService from '../app/service/simulationService'
 
 import { errorPopUp, warningPopUp } from "../components/toastr"
+import GeneralServices from '../app/service/generalServices'
 
 const visiblePairsTrueOption = {name: 'All', key: true}
 const visiblePairsFalseOption = {name: 'Just not configured yet', key: false}
@@ -86,6 +88,8 @@ class Simulation extends React.Component{
         simulationFinished: false,
         simulationError: false,
         simulationReport: '',
+        simulationProgressKey: '',
+        progress: 0,
     }
 
     constructor(){
@@ -360,10 +364,13 @@ class Simulation extends React.Component{
                     amountNodes: this.state.numberOfNodes
                 }
             }).then(response => {
-                console.log(response.data)
-                this.setState({simulationReport: JSON.stringify(response.data, null, 2)})
-                this.setState({simulationInProgress: false})
-                this.setState({simulationFinished: true})
+                const simulationProgressKey = response.data
+                console.log('key: ', simulationProgressKey)
+                // this.setState({simulationReport: JSON.stringify(response.data, null, 2)})
+                // this.setState({simulationInProgress: false})
+                // this.setState({simulationFinished: true})
+                this.setState({simulationProgressKey})
+                this.getProgress()
             })
             .catch(error => {
                 this.setState({simulationInProgress: false})
@@ -372,6 +379,21 @@ class Simulation extends React.Component{
             }
             )
         }
+    }
+
+    getProgress = async () => {
+       await GeneralServices.sleep(2000)
+       this.simulationService.getProgress(this.state.simulationProgressKey)
+       .then(response => {
+           const progress = response.data
+           console.log('progress: ', progress)
+           this.setState({progress})
+           this.getProgress()
+       })
+       .catch(error => {
+
+       })
+       
     }
 
     cancelDefineParameters = () => {
@@ -548,6 +570,16 @@ class Simulation extends React.Component{
                         style={ {maxHeight: '35px'} }
                     />
             )
+        }
+
+        const renderProgressBar = () => {
+            if(this.state.simulationInProgress && this.state.progress === 0) {
+                return(
+                    <>
+                    <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
+                    </>
+                )
+            }
         }
 
         const renderReport = () => {
@@ -788,7 +820,11 @@ class Simulation extends React.Component{
 
                     <br />
                     {renderStartButton()}
+
+                    <br />
+                    {renderProgressBar()}
                     
+                    <br />
                     {renderReport()}
                     
                 </div>

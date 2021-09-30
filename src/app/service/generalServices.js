@@ -2,7 +2,7 @@ import React from 'react'
 import currecyFormater from 'currency-formatter'
 
 class GeneralServices extends React.Component {
-    sleep(ms) {
+    static sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
      }
 
