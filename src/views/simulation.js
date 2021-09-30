@@ -4,6 +4,7 @@ import { withRouter } from 'react-router-dom'
 import Card from '../components/card'
 import FormGroup from '../components/form-group'
 import SelectMenu from '../components/selectMenu'
+import * as popUp from '../components/toastr'
 
 
 import { Button } from 'primereact/button'
@@ -14,7 +15,6 @@ import { ProgressBar } from 'primereact/progressbar'
 import SimulationTable from '../components/simulation/simulationTable'
 import SimulationService from '../app/service/simulationService'
 
-import { errorPopUp, warningPopUp } from "../components/toastr"
 import GeneralServices from '../app/service/generalServices'
 
 const visiblePairsTrueOption = {name: 'All', key: true}
@@ -157,7 +157,7 @@ class Simulation extends React.Component{
         var pairs = []
         var id=0
         if(this.state.numberOfNodes <= 1){
-            warningPopUp('Number of nodes must be greater than 1')
+            popUp.warningPopUp('Number of nodes must be greater than 1')
             return
         }
         for(var i = 0; i < this.state.numberOfNodes; i++){
@@ -375,7 +375,7 @@ class Simulation extends React.Component{
             .catch(error => {
                 this.setState({simulationInProgress: false})
                 this.setState({simulationError: true})
-                errorPopUp(error.response.data)
+                popUp.errorPopUp(error.response.data)
             }
             )
         }
@@ -384,16 +384,36 @@ class Simulation extends React.Component{
     getProgress = async () => {
        await GeneralServices.sleep(2000)
        this.simulationService.getProgress(this.state.simulationProgressKey)
-       .then(response => {
+       .then(async response => {
            const progress = response.data
            console.log('progress: ', progress)
-           this.setState({progress})
-           this.getProgress()
+           await this.setState({progress})
+           this.handleProgress()
        })
        .catch(error => {
 
        })
        
+    }
+
+    handleProgress = () => {
+        if(this.state.progress === 100){
+            this.setState({simulationInProgress: false})
+            this.setState({simulationFinished: true})
+            this.getProgressReport()
+        } else {
+            this.getProgress()
+        }
+    }
+
+    getSimulationReport = () => {
+        this.simulationService.getSimulationReport(this.state.simulationProgressKey)
+        .then(response => {
+            this.setState({simulationReport: response.data})
+        })
+        .catch(error => {
+            popUp.errorPopUp(error.response.data)
+        })
     }
 
     cancelDefineParameters = () => {
