@@ -389,6 +389,7 @@ class Simulation extends React.Component{
            console.log('progress: ', progress)
            await this.setState({progress})
            this.handleProgress()
+           popUp.successPopUp('pegou progress')
        })
        .catch(error => {
 
@@ -597,15 +598,17 @@ class Simulation extends React.Component{
             if(this.state.simulationInProgress || this.state.simulationFinished){
                 if(this.state.progress === 0) {
                 return(
-                    <>
+                    <div>
+                    <br />
                     <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
-                    </>
+                    </div>
                 )
             }   else {
                 return(
-                    <>
+                    <div>
+                    <br />
                     <ProgressBar value={this.state.progress}></ProgressBar>
-                    </>
+                    </div>
                 )
             }
             }
@@ -850,7 +853,6 @@ class Simulation extends React.Component{
                     <br />
                     {renderStartButton()}
 
-                    <br />
                     {renderProgressBar()}
                     
                     <br />
