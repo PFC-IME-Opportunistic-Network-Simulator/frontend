@@ -400,7 +400,7 @@ class Simulation extends React.Component{
         if(this.state.progress === 100){
             this.setState({simulationInProgress: false})
             this.setState({simulationFinished: true})
-            this.getProgressReport()
+            this.getSimulationReport()
         } else {
             this.getProgress()
         }
@@ -409,7 +409,8 @@ class Simulation extends React.Component{
     getSimulationReport = () => {
         this.simulationService.getSimulationReport(this.state.simulationProgressKey)
         .then(response => {
-            this.setState({simulationReport: response.data})
+            console.log('simulation response: ', response.data)
+            this.setState({simulationReport: JSON.stringify(response.data, null, 2)}) //pretty json
         })
         .catch(error => {
             popUp.errorPopUp(error.response.data)
@@ -593,12 +594,20 @@ class Simulation extends React.Component{
         }
 
         const renderProgressBar = () => {
-            if(this.state.simulationInProgress && this.state.progress === 0) {
+            if(this.state.simulationInProgress || this.state.simulationFinished){
+                if(this.state.progress === 0) {
                 return(
                     <>
                     <ProgressBar mode="indeterminate" style={{ height: '6px' }}></ProgressBar>
                     </>
                 )
+            }   else {
+                return(
+                    <>
+                    <ProgressBar value={this.state.progress}></ProgressBar>
+                    </>
+                )
+            }
             }
         }
 
