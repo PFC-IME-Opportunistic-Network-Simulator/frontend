@@ -42,14 +42,10 @@ class ApiService extends ApiBaseURL {
         })
     }
 
-    get(url){
+    get(url, headers = {}){
         // const token = AuthService.token() ? AuthService.token() : ''
         return this.httpClient.get(this.api_url + url, {
-            // headers: {
-            //     'Authorization': `Bearer ${token}`,
-            //     'Accept' : 'application/json',
-            //     'Content-Type': 'application/json'
-            // }
+            headers
         }
             )
     }

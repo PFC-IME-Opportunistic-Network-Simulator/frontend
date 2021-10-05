@@ -90,6 +90,7 @@ class Simulation extends React.Component{
         simulationReport: '',
         simulationProgressKey: '',
         progress: 0,
+        file:'',
     }
 
     constructor(){
@@ -339,6 +340,50 @@ class Simulation extends React.Component{
 
     }
 
+    base64ToArrayBuffer(base64) {
+        var binaryString = window.atob(base64);
+        var binaryLen = binaryString.length;
+        var bytes = new Uint8Array(binaryLen);
+        for (var i = 0; i < binaryLen; i++) {
+           var ascii = binaryString.charCodeAt(i);
+           bytes[i] = ascii;
+        }
+        return bytes;
+    }
+
+    download =() => {
+        this.simulationService.download()
+
+        // 1. Convert the data into 'blob'
+        .then((response) => {
+            // console.log('file: ', response.data)
+            // response.data.blob().then(blob => {
+            //     const url = window.URL.createObjectURL(new Blob([blob]));
+            //     const link = document.createElement('a');
+            //     link.href = url;
+            //     link.setAttribute('download', `sample.${this.state.file}`);
+            //     // 3. Append to html page
+            //     document.body.appendChild(link);
+            //     // 4. Force download
+            //     link.click();
+            //     // 5. Clean up and remove the link
+            //     link.parentNode.removeChild(link);
+            // })
+            console.log('response: ', response.data)
+            // var buffer = this.base64ToArrayBuffer(response.data)
+            // var data = new Blob([buffer], {type: 'txt'});
+            var data = new Blob([response.data], {type: 'application/zip'});
+            var csvURL = window.URL.createObjectURL(data);
+            let tempLink = document.createElement('a');
+            tempLink.href = csvURL;
+            tempLink.setAttribute('download', 'test.zip');
+            tempLink.click();
+        })
+        .catch((error) => {
+            console.log('error: ', error)
+        })
+    }
+
     callSimulation = () => {
         this.resetView()
         if(this.checkData()){
@@ -578,19 +623,26 @@ class Simulation extends React.Component{
                     <Button 
                         label="Running Simulation"
                         icon="pi pi-desktop"
-                        onClick={this.callSimulation}
                         style={ {maxHeight: '35px'} }
                         disabled
                     />
                 )
             }
             return (
+                <div>
                 <Button 
                         label="Start Simulation"
                         icon="pi pi-desktop"
                         onClick={this.callSimulation}
                         style={ {maxHeight: '35px'} }
                     />
+                    <Button 
+                        label="Donwload"
+                        icon="pi pi-donwload"
+                        onClick={this.download}
+                        style={ {maxHeight: '35px'} }
+                    />
+                </div>
             )
         }
 
