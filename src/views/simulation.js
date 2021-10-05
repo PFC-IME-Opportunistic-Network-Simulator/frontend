@@ -370,9 +370,9 @@ class Simulation extends React.Component{
             //     link.parentNode.removeChild(link);
             // })
             console.log('response: ', response.data)
-            // var buffer = this.base64ToArrayBuffer(response.data)
-            // var data = new Blob([buffer], {type: 'txt'});
-            var data = new Blob([response.data], {type: 'application/zip'});
+            var buffer = this.base64ToArrayBuffer(response.data)
+            var data = new Blob([buffer], {type: 'txt'});
+            // var data = new Blob([response.data], {type: 'application/zip'});
             var csvURL = window.URL.createObjectURL(data);
             let tempLink = document.createElement('a');
             tempLink.href = csvURL;
@@ -434,7 +434,6 @@ class Simulation extends React.Component{
            console.log('progress: ', progress)
            await this.setState({progress})
            this.handleProgress()
-           popUp.successPopUp('pegou progress')
        })
        .catch(error => {
 
