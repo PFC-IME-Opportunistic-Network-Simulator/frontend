@@ -317,6 +317,7 @@ class Simulation extends React.Component{
     resetView = () => {
 
         this.setState({simulationFinished: false})
+        this.setState({progress: 0})
 
         this.setState({inputNumberOfRoundsErrorClass: ''})
         
