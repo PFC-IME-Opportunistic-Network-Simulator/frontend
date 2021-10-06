@@ -340,44 +340,18 @@ class Simulation extends React.Component{
 
     }
 
-    base64ToArrayBuffer(base64) {
-        var binaryString = window.atob(base64);
-        var binaryLen = binaryString.length;
-        var bytes = new Uint8Array(binaryLen);
-        for (var i = 0; i < binaryLen; i++) {
-           var ascii = binaryString.charCodeAt(i);
-           bytes[i] = ascii;
-        }
-        return bytes;
-    }
-
     download =() => {
         this.simulationService.download()
-
-        // 1. Convert the data into 'blob'
         .then((response) => {
-            // console.log('file: ', response.data)
-            // response.data.blob().then(blob => {
-            //     const url = window.URL.createObjectURL(new Blob([blob]));
-            //     const link = document.createElement('a');
-            //     link.href = url;
-            //     link.setAttribute('download', `sample.${this.state.file}`);
-            //     // 3. Append to html page
-            //     document.body.appendChild(link);
-            //     // 4. Force download
-            //     link.click();
-            //     // 5. Clean up and remove the link
-            //     link.parentNode.removeChild(link);
-            // })
-            console.log('response: ', response.data)
-            var buffer = this.base64ToArrayBuffer(response.data)
-            var data = new Blob([buffer], {type: 'txt'});
-            // var data = new Blob([response.data], {type: 'application/zip'});
-            var csvURL = window.URL.createObjectURL(data);
+            var arrayBuffer = this.simulationService.base64ToArrayBuffer(response.data)
+            var data = new Blob([arrayBuffer]);
+            var url = window.URL.createObjectURL(data);
             let tempLink = document.createElement('a');
-            tempLink.href = csvURL;
-            tempLink.setAttribute('download', 'test.zip');
+            tempLink.href = url;
+            const filename =  response.headers['content-disposition'].split('filename=')[1];
+            tempLink.setAttribute('download', filename);
             tempLink.click();
+            tempLink.remove();
         })
         .catch((error) => {
             console.log('error: ', error)
