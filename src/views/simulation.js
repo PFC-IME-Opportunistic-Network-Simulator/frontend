@@ -609,12 +609,6 @@ class Simulation extends React.Component{
                         onClick={this.callSimulation}
                         style={ {maxHeight: '35px'} }
                     />
-                    <Button 
-                        label="Donwload"
-                        icon="pi pi-donwload"
-                        onClick={this.download}
-                        style={ {maxHeight: '35px'} }
-                    />
                 </div>
             )
         }
@@ -654,6 +648,15 @@ class Simulation extends React.Component{
                                         value={this.state.simulationReport}
                                         style={{marginTop: '0px', marginBottom: '0px', minHeight: '180px'}} />
                         </FormGroup>
+
+                        <br />
+
+                        <Button 
+                        label="Donwload Complete Report"
+                        icon="pi pi-download"
+                        onClick={this.download}
+                        style={ {maxHeight: '35px'} }
+                    />
                     </div>
                     </div>
                     </div>
