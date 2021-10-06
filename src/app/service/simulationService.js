@@ -6,8 +6,8 @@ class SimulationService extends ApiService{
         super('/api/simulation')
     }
 
-    download(){
-        return this.get('/download', {responseType: 'arraybuffer'})
+    download(key){
+        return this.get(`/download?key=${ key }`, {responseType: 'arraybuffer'})
     }
 
     runSimulation(simulationData){

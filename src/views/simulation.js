@@ -341,7 +341,7 @@ class Simulation extends React.Component{
     }
 
     download =() => {
-        this.simulationService.download()
+        this.simulationService.download(this.state.simulationProgressKey)
         .then((response) => {
             var arrayBuffer = this.simulationService.base64ToArrayBuffer(response.data)
             var data = new Blob([arrayBuffer]);
