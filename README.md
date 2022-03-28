@@ -19,7 +19,7 @@ Após isso, para subir a aplicação, execute:
 npm start
 ```
 
-A aplicação subirá na porta default 4200.
+A aplicação subirá na porta default 3000.
 
 Para compilar o projeto e gerar os artefatos html, execute:
 
